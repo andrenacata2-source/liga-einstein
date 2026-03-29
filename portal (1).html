@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liga Einstein — Portal do Associado</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: #e2e0d8;
+  --primary: #1a3a2a;
+  --primary2: #2d5c44;
+  --accent: #c8a84b;
+  --accent2: #e8c86a;
+  --text: #1a1a16;
+  --text2: #5a5a50;
+  --text3: #9a9a8a;
+  --danger: #c0392b;
+  --success: #1a7a4a;
+  --warning: #c87a1a;
+  --r: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;min-height:100vh}
+
+/* LOGIN SCREEN */
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(135deg,#1a3a2a 0%,#2d5c44 50%,#1a3a2a 100%)}
+.login-card{background:white;border-radius:20px;padding:48px 40px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.25)}
+.login-logo{font-family:'Fraunces',serif;font-size:32px;font-weight:600;color:var(--primary);margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:32px;font-weight:300}
+.login-divider{height:1px;background:var(--border);margin:24px 0;position:relative}
+.login-divider span{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:white;padding:0 12px;font-size:11px;color:var(--text3)}
+.login-desc{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:24px}
+
+/* PENDING SCREEN */
+#pending-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)}
+.pending-card{background:white;border-radius:20px;padding:48px 40px;max-width:420px;width:100%;text-align:center;border:1px solid var(--border)}
+.pending-icon{font-size:56px;margin-bottom:16px}
+
+/* APP */
+#app{display:none;min-height:100vh}
+header{background:var(--primary);color:white;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-logo{font-family:'Fraunces',serif;font-size:18px;font-weight:600;letter-spacing:-.3px}
+.header-logo span{color:var(--accent);margin-right:6px}
+.header-user{display:flex;align-items:center;gap:10px;font-size:13px}
+.avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.3)}
+.avatar-placeholder{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:var(--primary)}
+.btn-logout{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;padding:4px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s}
+.btn-logout:hover{background:rgba(255,255,255,.2)}
+
+nav{background:white;border-bottom:1px solid var(--border);display:flex;padding:0 24px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:none;color:var(--text2);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;padding:14px 16px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
+nav button.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+nav button:hover:not(.active){color:var(--text)}
+
+main{max-width:800px;margin:0 auto;padding:28px 20px}
+.section{display:none}
+.section.active{display:block}
+
+/* CARDS */
+.card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--primary);margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--text3);margin-bottom:20px}
+
+/* FORM */
+.form-grid{display:grid;gap:14px;margin-bottom:14px}
+.g2{grid-template-columns:1fr 1fr}
+@media(max-width:560px){.g2{grid-template-columns:1fr}}
+label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;padding:10px 14px;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);background:white}
+textarea{resize:vertical;min-height:80px}
+
+/* UPLOAD */
+.upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2)}
+.upload-area:hover,.upload-area.drag{border-color:var(--primary);background:rgba(26,58,42,.04)}
+.upload-icon{font-size:32px;margin-bottom:10px}
+.upload-preview{margin-top:14px;display:none}
+.upload-preview img{max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:hover{background:var(--primary2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--text2)}
+.btn-sm{padding:6px 14px;font-size:12px}
+
+/* STATUS BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.badge-pendente{background:#fff8e6;color:#c87a1a;border:1px solid #f0d080}
+.badge-aprovado{background:#e8f5ee;color:#1a7a4a;border:1px solid #a0d8b8}
+.badge-rejeitado{background:#fdecea;color:#c0392b;border:1px solid #f0a098}
+
+/* PAGAMENTOS LIST */
+.pagamento-item{background:white;border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;transition:box-shadow .15s}
+.pagamento-item:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.pagamento-info h4{font-size:14px;font-weight:600;margin-bottom:3px}
+.pagamento-info p{font-size:12px;color:var(--text2)}
+.pagamento-val{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--primary);text-align:right}
+.pagamento-val small{display:block;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;color:var(--text3);font-weight:400}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:500px){.stats-grid{grid-template-columns:1fr 1fr}}
+.stat{background:white;border:1px solid var(--border);border-radius:var(--r);padding:18px;text-align:center}
+.stat-val{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:var(--primary)}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-top:4px}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--primary);color:white;border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.err{background:var(--danger)}
+#toast.ok{background:var(--success)}
+
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div style="font-size:40px;margin-bottom:12px">🏆</div>
+    <div class="login-logo">Liga Einstein</div>
+    <div class="login-sub">Portal do Associado</div>
+    <p class="login-desc">Envie seus comprovantes de pagamento e acompanhe o status das suas mensalidades e eventos.</p>
+    <div id="g_id_onload" data-client_id="498286537759-kgj8404s6p3pjc5n3apknvktio9vlln5.apps.googleusercontent.com" data-callback="handleLogin" data-auto_select="false"></div>
+    <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-width="340"></div>
+    <div class="login-divider"><span>acesso restrito</span></div>
+    <p style="font-size:12px;color:var(--text3);line-height:1.6">Apenas associados cadastrados podem acessar. Após o login, aguarde aprovação da diretoria.</p>
+  </div>
+</div>
+
+<!-- PENDENTE -->
+<div id="pending-screen">
+  <div class="pending-card">
+    <div class="pending-icon">⏳</div>
+    <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--primary);margin-bottom:8px">Cadastro em análise</div>
+    <p style="color:var(--text2);font-size:13px;line-height:1.7;margin-bottom:24px">Seu cadastro foi recebido e está aguardando aprovação da diretoria. Você receberá acesso em breve!</p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:20px">Logado como: <strong id="pending-email"></strong></p>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-logo"><span>🏆</span>Liga Einstein</div>
+    <div class="header-user">
+      <img id="user-avatar" class="avatar" src="" onerror="this.style.display='none';document.getElementById('user-avatar-ph').style.display='flex'">
+      <div class="avatar-placeholder" id="user-avatar-ph" style="display:none"></div>
+      <span id="user-name" style="font-size:13px;color:rgba(255,255,255,.8)"></span>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="active" onclick="showTab('enviar',this)">📤 Enviar Comprovante</button>
+    <button onclick="showTab('meus',this)">📋 Meus Pagamentos</button>
+  </nav>
+
+  <main>
+
+    <!-- ENVIAR -->
+    <div class="section active" id="tab-enviar">
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-val" id="st-total">0</div><div class="stat-label">Enviados</div></div>
+        <div class="stat"><div class="stat-val" id="st-aprovados" style="color:var(--success)">0</div><div class="stat-label">Aprovados</div></div>
+        <div class="stat"><div class="stat-val" id="st-pendentes" style="color:var(--warning)">0</div><div class="stat-label">Pendentes</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Enviar comprovante de pagamento</div>
+        <div class="card-sub">Anexe o comprovante e preencha as informações. A diretoria irá confirmar o recebimento.</div>
+
+        <div class="form-grid g2">
+          <div>
+            <label>Tipo de pagamento</label>
+            <select id="p-tipo">
+              <option value="">— selecione —</option>
+              <option>Mensalidade</option>
+              <option>Uniforme</option>
+              <option>Festa/Evento</option>
+              <option>Taxa de inscrição</option>
+              <option>Outros</option>
+            </select>
+          </div>
+          <div>
+            <label>Valor pago (R$)</label>
+            <input type="number" id="p-valor" placeholder="0,00" step="0.01" min="0">
+          </div>
+        </div>
+
+        <div class="form-grid g2">
+          <div>
+            <label>Data do pagamento</label>
+            <input type="date" id="p-data">
+          </div>
+          <div>
+            <label>Referência (ex: Março/2026)</label>
+            <input type="text" id="p-ref" placeholder="Mês/Ano ou descrição do evento">
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label>Observação (opcional)</label>
+          <textarea id="p-obs" placeholder="Alguma informação adicional..."></textarea>
+        </div>
+
+        <div>
+          <label>Comprovante (foto ou PDF)</label>
+          <div class="upload-area" id="upload-area" onclick="document.getElementById('p-arquivo').click()"
+               ondragover="e=>{e.preventDefault();document.getElementById('upload-area').classList.add('drag')}"
+               ondragleave="document.getElementById('upload-area').classList.remove('drag')"
+               ondrop="handleDrop(event)">
+            <div class="upload-icon">📎</div>
+            <div style="font-size:14px;color:var(--text2);margin-bottom:4px">Clique para anexar o comprovante</div>
+            <div style="font-size:12px;color:var(--text3)">JPG, PNG ou PDF • máx. 10MB</div>
+            <input type="file" id="p-arquivo" accept="image/*,.pdf" style="display:none" onchange="handleFile(event)">
+          </div>
+          <div class="upload-preview" id="upload-preview">
+            <img id="preview-img" src="" alt="preview">
+            <div id="preview-name" style="font-size:12px;color:var(--text2);margin-top:6px"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:20px">
+          <button class="btn btn-primary" onclick="enviarComprovante()">📤 Enviar comprovante</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEUS PAGAMENTOS -->
+    <div class="section" id="tab-meus">
+      <div class="card" style="padding:16px 24px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--primary)">Histórico de pagamentos</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadMeusPagamentos()">🔄 Atualizar</button>
+        </div>
+      </div>
+      <div id="meus-list"><div class="empty"><div class="empty-icon">📭</div>Nenhum comprovante enviado ainda</div></div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFj3AtoY-PZTSbj-1jI3EeKVITuX-lqzoWOoVCLeocq559rkOzDy_AZO0QiY_sfsHXEA/exec';
+let currentUser = null;
+let selectedFile = null;
+let meusPagamentos = [];
+
+// ── AUTH ──────────────────────────────────────────────────
+function handleLogin(response) {
+  const payload = parseJwt(response.credential);
+  currentUser = { email: payload.email, nome: payload.name, foto: payload.picture, token: response.credential };
+  checkAccess();
+}
+
+function parseJwt(token) {
+  const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+  return JSON.parse(decodeURIComponent(atob(base64).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+}
+
+async function checkAccess() {
+  try {
+    const r = await fetch(`${SCRIPT_URL}?action=checkUser&email=${encodeURIComponent(currentUser.email)}`);
+    const data = await r.json();
+    if (data.status === 'aprovado') {
+      currentUser.perfil = data.perfil;
+      showApp();
+    } else if (data.status === 'pendente') {
+      showPending();
+    } else {
+      // Novo usuário — cadastrar
+      await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+        action: 'cadastrarUsuario',
+        email: currentUser.email,
+        nome: currentUser.nome,
+        perfil: 'associado',
+        status: 'pendente'
+      })});
+      showPending();
+    }
+  } catch(e) {
+    toast('Erro de conexão. Tente novamente.','err');
+  }
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pending-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-name').textContent = currentUser.nome.split(' ')[0];
+  const av = document.getElementById('user-avatar');
+  if (currentUser.foto) { av.src = currentUser.foto; av.style.display = 'block'; }
+  else { document.getElementById('user-avatar-ph').textContent = currentUser.nome[0]; document.getElementById('user-avatar-ph').style.display = 'flex'; }
+  document.getElementById('p-data').value = new Date().toISOString().slice(0,10);
+  loadMeusPagamentos();
+}
+
+function showPending() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pending-screen').style.display = 'flex';
+  document.getElementById('pending-email').textContent = currentUser.email;
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pending-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  google.accounts.id.disableAutoSelect();
+}
+
+// ── TABS ──────────────────────────────────────────────────
+function showTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'meus') loadMeusPagamentos();
+}
+
+// ── FILE UPLOAD ───────────────────────────────────────────
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-area').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+function processFile(file) {
+  if (file.size > 10 * 1024 * 1024) { toast('Arquivo muito grande. Máximo 10MB.','err'); return; }
+  selectedFile = file;
+  const preview = document.getElementById('upload-preview');
+  const img = document.getElementById('preview-img');
+  const name = document.getElementById('preview-name');
+  preview.style.display = 'block';
+  name.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(0)}KB)`;
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+    reader.readAsDataURL(file);
+  } else {
+    img.style.display = 'none';
+  }
+}
+
+// ── ENVIAR COMPROVANTE ────────────────────────────────────
+async function enviarComprovante() {
+  const tipo  = document.getElementById('p-tipo').value;
+  const valor = parseFloat(document.getElementById('p-valor').value);
+  const data  = document.getElementById('p-data').value;
+  const ref   = document.getElementById('p-ref').value.trim();
+  const obs   = document.getElementById('p-obs').value.trim();
+
+  if (!tipo || !valor || !data || !ref) { toast('Preencha tipo, valor, data e referência','err'); return; }
+  if (!selectedFile) { toast('Anexe o comprovante','err'); return; }
+
+  const btn = document.querySelector('[onclick="enviarComprovante()"]');
+  btn.textContent = '⏳ Enviando...'; btn.disabled = true;
+
+  try {
+    // Convert file to base64
+    const base64 = await fileToBase64(selectedFile);
+    const payload = {
+      action: 'enviarComprovante',
+      email: currentUser.email,
+      nome: currentUser.nome,
+      tipo, valor, data, ref, obs,
+      arquivo_nome: selectedFile.name,
+      arquivo_tipo: selectedFile.type,
+      arquivo_base64: base64
+    };
+    const r = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+    const result = await r.json();
+    if (result.ok) {
+      toast('Comprovante enviado com sucesso! ✓','ok');
+      // Reset form
+      document.getElementById('p-tipo').value = '';
+      document.getElementById('p-valor').value = '';
+      document.getElementById('p-ref').value = '';
+      document.getElementById('p-obs').value = '';
+      document.getElementById('upload-preview').style.display = 'none';
+      selectedFile = null;
+      loadMeusPagamentos();
+    } else {
+      toast('Erro ao enviar: ' + (result.error||'tente novamente'),'err');
+    }
+  } catch(e) {
+    toast('Erro de conexão','err');
+  } finally {
+    btn.textContent = '📤 Enviar comprovante'; btn.disabled = false;
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result.split(',')[1]);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── MEUS PAGAMENTOS ───────────────────────────────────────
+async function loadMeusPagamentos() {
+  if (!currentUser) return;
+  try {
+    const r = await fetch(`${SCRIPT_URL}?action=meusPagamentos&email=${encodeURIComponent(currentUser.email)}`);
+    const data = await r.json();
+    meusPagamentos = data.pagamentos || [];
+    renderMeusPagamentos();
+    updateStats();
+  } catch(e) {}
+}
+
+function renderMeusPagamentos() {
+  const el = document.getElementById('meus-list');
+  if (!meusPagamentos.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Nenhum comprovante enviado ainda</div>';
+    return;
+  }
+  el.innerHTML = meusPagamentos.sort((a,b)=>b.data.localeCompare(a.data)).map(p => `
+    <div class="pagamento-item">
+      <div class="pagamento-info">
+        <h4>${p.tipo} <span class="badge badge-${p.status}">${statusLabel(p.status)}</span></h4>
+        <p>${p.ref} • ${fmtDate(p.data)}${p.obs ? ' • '+p.obs : ''}</p>
+        ${p.status==='rejeitado'&&p.obs_diretoria?`<p style="color:var(--danger);margin-top:4px;font-size:12px">⚠️ ${p.obs_diretoria}</p>`:''}
+        ${p.arquivo_url?`<a href="${p.arquivo_url}" target="_blank" style="font-size:12px;color:var(--primary2);text-decoration:none;margin-top:4px;display:inline-block">📎 Ver comprovante</a>`:''}
+      </div>
+      <div class="pagamento-val">
+        ${fmtVal(p.valor)}
+        <small>${p.status==='aprovado'?'✓ Confirmado':'Aguardando'}</small>
+      </div>
+    </div>`).join('');
+}
+
+function updateStats() {
+  document.getElementById('st-total').textContent = meusPagamentos.length;
+  document.getElementById('st-aprovados').textContent = meusPagamentos.filter(p=>p.status==='aprovado').length;
+  document.getElementById('st-pendentes').textContent = meusPagamentos.filter(p=>p.status==='pendente').length;
+}
+
+// ── UTILS ─────────────────────────────────────────────────
+function statusLabel(s) {
+  return {pendente:'⏳ Pendente',aprovado:'✓ Aprovado',rejeitado:'✕ Rejeitado'}[s]||s;
+}
+function fmtVal(v) {
+  return 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtDate(d) {
+  if (!d) return '';
+  if (d.includes('/')) return d;
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `show ${type}`;
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => el.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
