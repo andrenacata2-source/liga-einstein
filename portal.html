@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,7 +6,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Liga Einstein — Portal do Associado</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer>
+async function salvarPerfil() {
+  const nome = document.getElementById('p-nome').value.trim();
+  const numsocio = document.getElementById('p-numsocio').value.trim();
+  const curso = document.getElementById('p-curso').value.trim();
+  const turma = document.getElementById('p-turma').value.trim();
+  const genero = document.getElementById('p-genero').value;
+  const tel = document.getElementById('p-tel').value.trim();
+  const modalidades = [...document.querySelectorAll('#modal-checkboxes input:checked')].map(i=>i.value);
+  if (!nome) { toast('Informe seu nome completo','err'); return; }
+  const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+    action: 'atualizarPerfil',
+    email: currentUser.email,
+    nome, numero_socio: numsocio, curso, turma, genero, telefone: tel, modalidades
+  })});
+  const data = await res.json();
+  if (data.ok) toast('Perfil salvo! ✓','ok');
+  else toast('Erro ao salvar','err');
+}
+
+function carregarPerfil() {
+  // Load saved profile from usuarios list
+  const u = window._perfilData;
+  if (!u) return;
+  document.getElementById('p-nome').value = u.nome||'';
+  document.getElementById('p-numsocio').value = u.numero_socio||'';
+  document.getElementById('p-curso').value = u.curso||'';
+  document.getElementById('p-turma').value = u.turma||'';
+  document.getElementById('p-genero').value = u.genero||'';
+  document.getElementById('p-tel').value = u.telefone||'';
+  const mods = u.modalidades||[];
+  document.querySelectorAll('#modal-checkboxes input').forEach(cb => { cb.checked = mods.includes(cb.value); });
+}
+
+async function loadPerfilData() {
+  try {
+    const r = await fetch(SCRIPT_URL+);
+    const d = await r.json();
+    if (d.ok && d.usuario) { window._perfilData = d.usuario; carregarPerfil(); }
+  } catch(e) {}
+}
+</script>
 <style>
 :root {
   --bg: #f5f4f0;
@@ -131,7 +173,7 @@ textarea{resize:vertical;min-height:80px}
     <div class="login-logo">Liga Einstein</div>
     <div class="login-sub">Portal do Associado</div>
     <p class="login-desc">Envie seus comprovantes de pagamento e acompanhe o status das suas mensalidades e eventos.</p>
-    <div id="g_id_onload" data-client_id="498286537759-kgj8404s6p3pjc5n3apknvktio9vlln5.apps.googleusercontent.com" data-callback="handleLogin" data-auto_select="false"></div>
+    <div id="g_id_onload" data-client_id="SEU_GOOGLE_CLIENT_ID" data-callback="handleLogin" data-auto_select="false"></div>
     <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-width="340"></div>
     <div class="login-divider"><span>acesso restrito</span></div>
     <p style="font-size:12px;color:var(--text3);line-height:1.6">Apenas associados cadastrados podem acessar. Após o login, aguarde aprovação da diretoria.</p>
@@ -164,6 +206,7 @@ textarea{resize:vertical;min-height:80px}
   <nav>
     <button class="active" onclick="showTab('enviar',this)">📤 Enviar Comprovante</button>
     <button onclick="showTab('meus',this)">📋 Meus Pagamentos</button>
+  <button onclick="showTab('perfil',this)">👤 Meu Perfil</button>
   </nav>
 
   <main>
@@ -248,13 +291,51 @@ textarea{resize:vertical;min-height:80px}
       <div id="meus-list"><div class="empty"><div class="empty-icon">📭</div>Nenhum comprovante enviado ainda</div></div>
     </div>
 
+
+    <!-- PERFIL -->
+    <div class="section" id="tab-perfil">
+      <div class="card">
+        <div class="card-title">👤 Meu perfil</div>
+        <div class="card-sub">Mantenha seus dados atualizados. As modalidades precisam de aprovação da diretoria.</div>
+        <div class="form-grid g2">
+          <div><label>Nome completo</label><input type="text" id="p-nome" placeholder="Seu nome completo"></div>
+          <div><label>Número de sócio</label><input type="text" id="p-numsocio" placeholder="Ex: 25005"></div>
+          <div><label>Curso</label><input type="text" id="p-curso" placeholder="Ex: Fisioterapia"></div>
+          <div><label>Turma</label><input type="text" id="p-turma" placeholder="Ex: T3"></div>
+          <div><label>Gênero</label>
+            <select id="p-genero">
+              <option value="">— selecione —</option>
+              <option>Masculino</option><option>Feminino</option><option>Outro</option>
+            </select>
+          </div>
+          <div><label>WhatsApp / Telefone</label><input type="text" id="p-tel" placeholder="(11) 99999-9999"></div>
+        </div>
+        <div style="margin-bottom:16px">
+          <label>Modalidades esportivas</label>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px" id="modal-checkboxes">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;cursor:pointer"><input type="checkbox" value="Basquete"> Basquete</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;cursor:pointer"><input type="checkbox" value="Futsal"> Futsal</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;cursor:pointer"><input type="checkbox" value="Handebol"> Handebol</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;cursor:pointer"><input type="checkbox" value="Vôlei"> Vôlei</label>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px">⚠️ Alterações nas modalidades precisam de aprovação da diretoria.</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary" onclick="salvarPerfil()">💾 Salvar perfil</button>
+        </div>
+      </div>
+      <div class="card" id="meus-comp-perfil">
+        <div class="card-title">Meus comprovantes</div>
+        <div id="meus-comp-lista-perfil"><div style="color:var(--text3);font-size:13px">Carregando...</div></div>
+      </div>
+    </div>
   </main>
 </div>
 
 <div id="toast"></div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFj3AtoY-PZTSbj-1jI3EeKVITuX-lqzoWOoVCLeocq559rkOzDy_AZO0QiY_sfsHXEA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5LMyeCxgQFislYmHpMZ9TaM8VLRfcz7lJ-f2Y-vOP1hSO9JplEB7VXxYgq3Cgkb0x/exec';
 let currentUser = null;
 let selectedFile = null;
 let meusPagamentos = [];
@@ -305,6 +386,7 @@ function showApp() {
   if (currentUser.foto) { av.src = currentUser.foto; av.style.display = 'block'; }
   else { document.getElementById('user-avatar-ph').textContent = currentUser.nome[0]; document.getElementById('user-avatar-ph').style.display = 'flex'; }
   document.getElementById('p-data').value = new Date().toISOString().slice(0,10);
+  loadPerfilData();
   loadMeusPagamentos();
 }
 
@@ -475,6 +557,47 @@ function toast(msg, type='ok') {
   el.textContent = msg; el.className = `show ${type}`;
   clearTimeout(window._tt);
   window._tt = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+async function salvarPerfil() {
+  const nome = document.getElementById('p-nome').value.trim();
+  const numsocio = document.getElementById('p-numsocio').value.trim();
+  const curso = document.getElementById('p-curso').value.trim();
+  const turma = document.getElementById('p-turma').value.trim();
+  const genero = document.getElementById('p-genero').value;
+  const tel = document.getElementById('p-tel').value.trim();
+  const modalidades = [...document.querySelectorAll('#modal-checkboxes input:checked')].map(i=>i.value);
+  if (!nome) { toast('Informe seu nome completo','err'); return; }
+  const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+    action: 'atualizarPerfil',
+    email: currentUser.email,
+    nome, numero_socio: numsocio, curso, turma, genero, telefone: tel, modalidades
+  })});
+  const data = await res.json();
+  if (data.ok) toast('Perfil salvo! ✓','ok');
+  else toast('Erro ao salvar','err');
+}
+
+function carregarPerfil() {
+  // Load saved profile from usuarios list
+  const u = window._perfilData;
+  if (!u) return;
+  document.getElementById('p-nome').value = u.nome||'';
+  document.getElementById('p-numsocio').value = u.numero_socio||'';
+  document.getElementById('p-curso').value = u.curso||'';
+  document.getElementById('p-turma').value = u.turma||'';
+  document.getElementById('p-genero').value = u.genero||'';
+  document.getElementById('p-tel').value = u.telefone||'';
+  const mods = u.modalidades||[];
+  document.querySelectorAll('#modal-checkboxes input').forEach(cb => { cb.checked = mods.includes(cb.value); });
+}
+
+async function loadPerfilData() {
+  try {
+    const r = await fetch(SCRIPT_URL+);
+    const d = await r.json();
+    if (d.ok && d.usuario) { window._perfilData = d.usuario; carregarPerfil(); }
+  } catch(e) {}
 }
 </script>
 </body>
