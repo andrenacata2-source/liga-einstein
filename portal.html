@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liga Einstein — Portal do Associado</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300;400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:#e2e0d8;--primary:#1a3a2a;--primary2:#2d5c44;--accent:#c8a84b;--text:#1a1a16;--text2:#5a5a50;--text3:#9a9a8a;--danger:#c0392b;--success:#1a7a4a;--warning:#c87a1a;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;min-height:100vh}
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(135deg,#1a3a2a 0%,#2d5c44 50%,#1a3a2a 100%)}
+.login-card{background:white;border-radius:20px;padding:48px 40px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.25)}
+.login-logo{font-family:'Fraunces',serif;font-size:32px;font-weight:600;color:var(--primary);margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:28px;font-weight:300}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px 20px;background:white;border:1px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--text)}
+.google-btn:hover{background:var(--surface2);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.google-btn img{width:20px;height:20px}
+#pending-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)}
+.pending-card{background:white;border-radius:20px;padding:48px 40px;max-width:420px;width:100%;text-align:center;border:1px solid var(--border)}
+#app{display:none;min-height:100vh}
+header{background:var(--primary);color:white;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-logo{font-family:'Fraunces',serif;font-size:18px;font-weight:600}
+.header-logo span{color:var(--accent);margin-right:6px}
+.header-user{display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.3)}
+.btn-logout{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;padding:4px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+nav{background:white;border-bottom:1px solid var(--border);display:flex;padding:0 24px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:none;color:var(--text2);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;padding:14px 14px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
+nav button.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+main{max-width:800px;margin:0 auto;padding:28px 20px}
+.section{display:none}.section.active{display:block}
+.card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--primary);margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--text3);margin-bottom:20px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:var(--primary2)}
+.btn-danger{background:#fdecea;color:var(--danger);border:1px solid #f0b0a8}.btn-danger:hover{background:#fad5d2}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.form-grid{display:grid;gap:12px;margin-bottom:12px}
+.g2{grid-template-columns:1fr 1fr}
+@media(max-width:560px){.g2{grid-template-columns:1fr}}
+label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;padding:10px 14px;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);background:white}
+textarea{resize:vertical;min-height:80px}
+.upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2)}
+.upload-area:hover,.upload-area.drag{border-color:var(--primary);background:rgba(26,58,42,.04)}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.badge-pendente{background:#fff8e6;color:#c87a1a;border:1px solid #f0d080}
+.badge-aprovado{background:#e8f5ee;color:#1a7a4a;border:1px solid #a0d8b8}
+.badge-rejeitado{background:#fdecea;color:#c0392b;border:1px solid #f0a098}
+.badge-quite{background:#e8f5ee;color:#1a7a4a;border:1px solid #a0d8b8}
+.badge-inadim{background:#fdecea;color:#c0392b;border:1px solid #f0a098}
+.badge-cancelamento{background:#fff8e6;color:#c87a1a;border:1px solid #f0d080}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:500px){.stats-grid{grid-template-columns:1fr 1fr}}
+.stat{background:white;border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.stat-val{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:var(--primary)}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-top:4px}
+.modal-tag{display:inline-block;background:var(--primary);color:white;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;margin:2px}
+.modal-tag.pending{background:var(--warning)}
+.modal-tag.cancelamento{background:var(--danger)}
+.pagamento-item{background:white;border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.info-box{background:rgba(26,58,42,.06);border:1px solid rgba(26,58,42,.2);border-radius:8px;padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px}
+.valor-box{background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.3);border-radius:10px;padding:16px;margin-bottom:16px;text-align:center}
+.valor-box .val{font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:var(--primary)}
+.valor-box .label{font-size:12px;color:var(--text2);margin-top:4px}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--primary);color:white;border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.err{background:var(--danger)}
+#toast.ok{background:var(--success)}
+.empty{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-icon{font-size:40px;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div style="font-size:48px;margin-bottom:16px">🏆</div>
+    <div class="login-logo">Liga Einstein</div>
+    <div class="login-sub">Portal do Associado</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:28px">Envie comprovantes, acompanhe suas mensalidades e gerencie suas modalidades.</p>
+    <button class="google-btn" onclick="loginGoogle()">
+      <img src="https://www.google.com/favicon.ico"> Entrar com Google
+    </button>
+  </div>
+</div>
+
+<div id="pending-screen">
+  <div class="pending-card">
+    <div style="font-size:56px;margin-bottom:16px">⏳</div>
+    <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--primary);margin-bottom:8px">Cadastro em análise</div>
+    <p style="color:var(--text2);font-size:13px;line-height:1.7;margin-bottom:20px">Seu cadastro foi recebido! A diretoria irá aprovar em breve.</p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:20px">Logado como: <strong id="pending-email"></strong></p>
+    <div id="reativacao-section" style="display:none;margin-bottom:16px">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Você é um ex-associado. Deseja solicitar reativação?</p>
+      <textarea id="reativacao-motivo" placeholder="Conte o motivo do retorno (opcional)..." style="width:100%;padding:10px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;margin-bottom:10px;min-height:80px"></textarea>
+      <button class="btn btn-primary" style="width:100%" onclick="solicitarReativacao()">🔄 Solicitar reativação</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="header-logo"><span>🏆</span>Liga Einstein</div>
+    <div class="header-user">
+      <img id="user-avatar" class="avatar" src="" style="display:none">
+      <span id="user-name" style="font-size:13px;color:rgba(255,255,255,.8)"></span>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="active" onclick="showTab('inicio',this)">🏠 Início</button>
+    <button onclick="showTab('enviar',this)">📤 Enviar Comprovante</button>
+    <button onclick="showTab('historico',this)">📋 Histórico</button>
+    <button onclick="showTab('perfil',this)">👤 Meu Perfil</button>
+  </nav>
+
+  <main>
+
+    <!-- INÍCIO -->
+    <div class="section active" id="tab-inicio">
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-val" id="st-total">0</div><div class="stat-label">Enviados</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--success)" id="st-aprovados">0</div><div class="stat-label">Aprovados</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--warning)" id="st-pendentes">0</div><div class="stat-label">Pendentes</div></div>
+      </div>
+
+      <div class="card" id="card-valor-mensalidade" style="display:none">
+        <div class="card-title">💰 Sua mensalidade</div>
+        <div class="valor-box">
+          <div class="val" id="valor-mensalidade">R$ 0,00</div>
+          <div class="label" id="label-mensalidade">Calculando...</div>
+        </div>
+        <div id="status-mensalidade-mes"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🏅 Minhas modalidades</div>
+        <div id="minhas-modalidades">
+          <div class="empty"><div class="empty-icon">🏅</div>Nenhuma modalidade cadastrada</div>
+        </div>
+        <div style="margin-top:16px;font-size:12px;color:var(--text3)">Para alterar suas modalidades, vá em 👤 Meu Perfil.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Últimos comprovantes</div>
+        <div id="ultimos-comp">
+          <div class="empty"><div class="empty-icon">📭</div>Nenhum comprovante enviado</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENVIAR -->
+    <div class="section" id="tab-enviar">
+      <div class="card">
+        <div class="card-title">📤 Enviar comprovante de pagamento</div>
+        <div class="card-sub">Anexe o comprovante e preencha as informações. A diretoria irá confirmar.</div>
+
+        <div class="form-grid g2">
+          <div>
+            <label>Tipo de pagamento</label>
+            <select id="p-tipo">
+              <option value="">— selecione —</option>
+              <option>Mensalidade</option>
+              <option>Uniforme</option>
+              <option>Festa/Evento</option>
+              <option>Taxa de inscrição</option>
+              <option>Outros</option>
+            </select>
+          </div>
+          <div>
+            <label>Mês de referência</label>
+            <select id="p-ref">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid g2">
+          <div>
+            <label>Valor pago (R$)</label>
+            <input type="number" id="p-valor" placeholder="0,00" step="0.01" min="0">
+          </div>
+          <div>
+            <label>Data do pagamento</label>
+            <input type="date" id="p-data">
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label>Observação (opcional)</label>
+          <textarea id="p-obs" placeholder="Alguma informação adicional..."></textarea>
+        </div>
+
+        <div>
+          <label>Comprovante (foto ou PDF)</label>
+          <div class="upload-area" id="upload-area" onclick="document.getElementById('p-arquivo').click()"
+               ondragover="ev=>{ev.preventDefault();document.getElementById('upload-area').classList.add('drag')}"
+               ondragleave="document.getElementById('upload-area').classList.remove('drag')"
+               ondrop="handleDrop(event)">
+            <div style="font-size:32px;margin-bottom:10px">📎</div>
+            <div style="font-size:14px;color:var(--text2);margin-bottom:4px">Clique para anexar o comprovante</div>
+            <div style="font-size:12px;color:var(--text3)">JPG, PNG ou PDF • máx. 10MB</div>
+            <input type="file" id="p-arquivo" accept="image/*,.pdf" style="display:none" onchange="handleFile(event)">
+          </div>
+          <div id="upload-preview" style="margin-top:10px;display:none">
+            <img id="preview-img" src="" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);display:none">
+            <div id="preview-name" style="font-size:12px;color:var(--text2);margin-top:6px"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:20px">
+          <button class="btn btn-primary" onclick="enviarComprovante()">📤 Enviar comprovante</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="section" id="tab-historico">
+      <div class="card" style="padding:16px 24px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--primary)">Histórico de pagamentos</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadMeusDados()">🔄 Atualizar</button>
+        </div>
+      </div>
+      <div id="historico-list"><div class="empty"><div class="empty-icon">📭</div>Nenhum comprovante ainda</div></div>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="section" id="tab-perfil">
+      <div class="card">
+        <div class="card-title">👤 Meu perfil</div>
+        <div class="card-sub">Mantenha seus dados atualizados. Alterações de modalidade precisam de aprovação.</div>
+
+        <div class="form-grid g2">
+          <div><label>Nome completo</label><input type="text" id="pf-nome" placeholder="Seu nome completo"></div>
+          <div>
+            <label>Número de sócio</label>
+            <input type="text" id="pf-numsocio" placeholder="Definido pela diretoria" readonly style="opacity:.6;cursor:not-allowed">
+          </div>
+          <div><label>Curso</label><input type="text" id="pf-curso" placeholder="Ex: Fisioterapia"></div>
+          <div><label>Turma</label><input type="text" id="pf-turma" placeholder="Ex: T3"></div>
+          <div>
+            <label>Gênero</label>
+            <select id="pf-genero">
+              <option value="">— selecione —</option>
+              <option>Masculino</option><option>Feminino</option><option>Outro</option>
+            </select>
+          </div>
+          <div><label>WhatsApp / Telefone</label><input type="text" id="pf-tel" placeholder="(11) 99999-9999"></div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <label>Modalidades esportivas</label>
+          <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Selecione as modalidades e informe a data de início em cada uma.</p>
+          <div id="modal-list"></div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary" onclick="salvarPerfil()">💾 Salvar perfil</button>
+        </div>
+      </div>
+
+      <div class="card" id="card-cancelamento" style="display:none">
+        <div class="card-title" style="color:var(--danger)">⚠️ Solicitar cancelamento</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px">
+          Se deseja encerrar sua participação na Liga Einstein, solicite o cancelamento abaixo. A diretoria irá analisar e confirmar.
+        </p>
+        <div style="margin-bottom:14px">
+          <label>Motivo (opcional)</label>
+          <textarea id="cancel-motivo" placeholder="Conte o motivo do cancelamento..."></textarea>
+        </div>
+        <button class="btn btn-danger" onclick="solicitarCancelamento()">Solicitar cancelamento</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD5TCBNV6vQ1Ynyls-P7LSNktzCnWOpWWI",
+  authDomain: "liga-einstein-2510f.firebaseapp.com",
+  projectId: "liga-einstein-2510f",
+  storageBucket: "liga-einstein-2510f.firebasestorage.app",
+  messagingSenderId: "549726733662",
+  appId: "1:549726733662:web:f57c11ab5075e7a9defbcf"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFj3AtoY-PZTSbj-1jI3EeKVITuX-lqzoWOoVCLeocq559rkOzDy_AZO0QiY_sfsHXEA/exec';
+const DRIVE_FOLDER_ID = '1tb5Atdk6FHgZKifVgxBXRlPgbPYV0e7N';
+const MODALIDADES = ['Basquete','Futsal Masc','Futsal Fem','Handebol','Vôlei Masc','Vôlei Fem'];
+const COMPETITIVOS = ['Vôlei Fem','Futsal Masc'];
+
+let currentUser = null;
+let userData = null;
+let meusPagamentos = [];
+let selectedFile = null;
+
+// ── AUTH ──────────────────────────────────────────────────
+window.loginGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+  } catch(e) {
+    toast('Erro ao fazer login: ' + e.message, 'err');
+  }
+};
+
+window.logout = async () => {
+  await signOut(auth);
+  currentUser = null; userData = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pending-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+};
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    currentUser = user;
+    await checkAccess();
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('pending-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+async function checkAccess() {
+  try {
+    const r = await fetch(`${SCRIPT_URL}?action=checkUser&email=${encodeURIComponent(currentUser.email)}`);
+    const data = await r.json();
+    if (data.status === 'aprovado') {
+      userData = data.usuario || {};
+      showApp();
+    } else if (data.status === 'pendente') {
+      showPending(false);
+    } else if (data.status === 'ex_associado') {
+      showPending(true);
+    } else {
+      // Novo usuário — cadastrar
+      await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+        action: 'cadastrarUsuario',
+        email: currentUser.email,
+        nome: currentUser.displayName || '',
+        perfil: 'associado',
+        status: 'pendente'
+      })});
+      showPending();
+    }
+  } catch(e) {
+    toast('Erro de conexão', 'err');
+  }
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pending-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  const av = document.getElementById('user-avatar');
+  if (currentUser.photoURL) { av.src = currentUser.photoURL; av.style.display = 'block'; }
+  document.getElementById('user-name').textContent = (currentUser.displayName||'').split(' ')[0];
+  setDefaults();
+  buildModalList();
+  buildRefSelect();
+  carregarPerfil();
+  loadMeusDados();
+  document.getElementById('card-cancelamento').style.display = userData.status !== 'ex_associado' ? 'block' : 'none';
+}
+
+function showPending(isEx=false) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pending-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pending-email').textContent = currentUser.email;
+  document.getElementById('reativacao-section').style.display = isEx ? 'block' : 'none';
+}
+
+// ── TABS ──────────────────────────────────────────────────
+window.showTab = (name, btn) => {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'historico') renderHistorico();
+};
+
+// ── DEFAULTS ──────────────────────────────────────────────
+function setDefaults() {
+  document.getElementById('p-data').value = new Date().toISOString().slice(0,10);
+}
+
+function buildRefSelect() {
+  const sel = document.getElementById('p-ref');
+  sel.innerHTML = '<option value="">— selecione o mês —</option>';
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const val = d.toISOString().slice(0,7);
+    const label = d.toLocaleDateString('pt-BR', {month:'long', year:'numeric'});
+    const o = document.createElement('option');
+    o.value = val; o.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    sel.appendChild(o);
+  }
+  // Default = mes atual
+  sel.value = now.toISOString().slice(0,7);
+}
+
+// ── MODALIDADES ───────────────────────────────────────────
+function buildModalList() {
+  const mods = userData.modalidades || [];
+  const el = document.getElementById('modal-list');
+  el.innerHTML = MODALIDADES.map(m => {
+    const found = mods.find(x => x.nome === m);
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;text-transform:none;letter-spacing:0;cursor:pointer;flex:1;min-width:140px">
+        <input type="checkbox" value="${m}" ${found?'checked':''} style="width:16px;height:16px" onchange="toggleModal('${m}',this.checked)"> 
+        <span><strong>${m}</strong> ${COMPETITIVOS.includes(m)?'<span style="font-size:10px;background:#e8f5ee;color:#1a7a4a;padding:1px 6px;border-radius:10px;font-weight:700">COMPETITIVO</span>':''}</span>
+      </label>
+      <div id="inicio-${m.replace(/\s/g,'_')}" style="${found?'':'display:none'}">
+        <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Data de início</label>
+        <input type="date" style="padding:6px 10px;font-size:12px;width:150px" value="${found?.inicio||''}" id="data-inicio-${m.replace(/\s/g,'_')}">
+      </div>
+      ${found?.status==='pendente'?'<span class="badge badge-pendente">⏳ Aguardando aprovação</span>':''}
+      ${found?.status==='aprovado'&&!found?.cancelamento_pendente?`<span class="badge badge-aprovado">✓ Ativo</span><button class="btn btn-danger btn-xs" style="margin-left:8px" onclick="pedirSaidaModal('${m}')">Pedir saída</button>`:''}
+      ${found?.cancelamento_pendente?'<span class="badge badge-cancelamento">⏳ Saída aguardando aprovação</span>':''}
+    </div>`;
+  }).join('');
+}
+
+window.toggleModal = (nome, checked) => {
+  const id = `inicio-${nome.replace(/\s/g,'_')}`;
+  document.getElementById(id).style.display = checked ? 'block' : 'none';
+};
+
+function getMesesNecessarios(modalidades) {
+  const mods = (modalidades||[]).filter(m=>m.status==='aprovado');
+  if (!mods.length) return [];
+  const inicios = mods.map(m=>m.inicio).filter(Boolean).sort();
+  const inicio = inicios[0];
+  const now = new Date();
+  const mesAtual = now.toISOString().slice(0,7);
+  const mesAnterior = new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString().slice(0,7);
+  const meses = [];
+  if (inicio && inicio <= mesAtual) meses.push(mesAtual);
+  if (inicio && inicio <= mesAnterior) meses.push(mesAnterior);
+  return meses;
+}
+
+function calcularMensalidade(modalidades) {
+  const ativas = (modalidades || []).filter(m => m.status === 'aprovado');
+  if (!ativas.length) return { valor: 0, label: 'Nenhuma modalidade ativa' };
+  let base = 0, extra = 0;
+  const temCompetitivo = ativas.some(m => COMPETITIVOS.includes(m.nome));
+  base = temCompetitivo ? 80 : 70;
+  extra = (ativas.length - 1) * 5;
+  const total = base + extra;
+  const nomes = ativas.map(m => m.nome).join(', ');
+  return { valor: total, label: `${nomes} • ${ativas.length} modalidade${ativas.length>1?'s':''}` };
+}
+
+// ── PERFIL ────────────────────────────────────────────────
+function carregarPerfil() {
+  if (!userData) return;
+  document.getElementById('pf-nome').value = userData.nome || currentUser.displayName || '';
+  document.getElementById('pf-numsocio').value = userData.numero_socio || 'Aguardando diretoria';
+  document.getElementById('pf-curso').value = userData.curso || '';
+  document.getElementById('pf-turma').value = userData.turma || '';
+  document.getElementById('pf-genero').value = userData.genero || '';
+  document.getElementById('pf-tel').value = userData.telefone || '';
+
+  // Valor da mensalidade
+  const mods = userData.modalidades || [];
+  if (mods.length > 0) {
+    const { valor, label } = calcularMensalidade(mods);
+    document.getElementById('card-valor-mensalidade').style.display = 'block';
+    document.getElementById('valor-mensalidade').textContent = `R$ ${valor.toFixed(2).replace('.',',')}`;
+    document.getElementById('label-mensalidade').textContent = label;
+  }
+
+  // Modalidades no início
+  const modsEl = document.getElementById('minhas-modalidades');
+  if (mods.length) {
+    modsEl.innerHTML = mods.map(m => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <strong style="font-size:13px">${m.nome}</strong>
+          ${m.inicio?`<div style="font-size:11px;color:var(--text3)">Desde ${fmtDate(m.inicio)}</div>`:''}
+        </div>
+        <span class="badge badge-${m.status==='aprovado'?'aprovado':m.status==='pendente'?'pendente':'rejeitado'}">${m.status==='aprovado'?'✓ Ativo':m.status==='pendente'?'⏳ Pendente':'✕ Rejeitado'}</span>
+      </div>`).join('');
+  }
+}
+
+window.pedirSaidaModal = async (nome) => {
+  if (!confirm(`Solicitar saída de ${nome}? A diretoria precisará aprovar.`)) return;
+  const mods = userData.modalidades || [];
+  const m = mods.find(x=>x.nome===nome);
+  if (!m) return;
+  m.cancelamento_pendente = true;
+  const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+    action: 'atualizarPerfil',
+    email: currentUser.email,
+    modalidades: mods
+  })});
+  const data = await res.json();
+  if (data.ok) {
+    userData.modalidades = mods;
+    toast('Solicitação de saída enviada! A diretoria irá analisar.','ok');
+    buildModalList();
+  } else toast('Erro ao enviar','err');
+};
+
+window.salvarPerfil = async () => {
+  const nome = document.getElementById('pf-nome').value.trim();
+  const curso = document.getElementById('pf-curso').value.trim();
+  const turma = document.getElementById('pf-turma').value.trim();
+  const genero = document.getElementById('pf-genero').value;
+  const tel = document.getElementById('pf-tel').value.trim();
+  if (!nome) { toast('Informe seu nome', 'err'); return; }
+
+  // Coletar modalidades selecionadas
+  const modalidades = [];
+  MODALIDADES.forEach(m => {
+    const cb = document.querySelector(`#modal-list input[value="${m}"]`);
+    if (cb && cb.checked) {
+      const idKey = m.replace(/\s/g,'_');
+      const inicio = document.getElementById(`data-inicio-${idKey}`)?.value || '';
+      const existing = (userData.modalidades||[]).find(x=>x.nome===m);
+      modalidades.push({
+        nome: m,
+        inicio: existing?.inicio || inicio,
+        status: existing?.status || 'pendente',
+        cancelamento_pendente: existing?.cancelamento_pendente || false
+      });
+    }
+  });
+
+  const btn = document.querySelector('[onclick="salvarPerfil()"]');
+  btn.textContent = '⏳ Salvando...'; btn.disabled = true;
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+      action: 'atualizarPerfil',
+      email: currentUser.email,
+      nome, curso, turma, genero, telefone: tel,
+      modalidades
+    })});
+    const data = await res.json();
+    if (data.ok) {
+      userData = { ...userData, nome, curso, turma, genero, telefone: tel, modalidades };
+      toast('Perfil salvo! ✓', 'ok');
+      buildModalList();
+      carregarPerfil();
+    } else toast('Erro ao salvar', 'err');
+  } catch(e) { toast('Erro de conexão', 'err'); }
+  finally { btn.textContent = '💾 Salvar perfil'; btn.disabled = false; }
+};
+
+// ── REATIVAÇÃO ───────────────────────────────────────────
+window.solicitarReativacao = async () => {
+  const motivo = document.getElementById('reativacao-motivo').value.trim();
+  const btn = document.querySelector('[onclick="solicitarReativacao()"]');
+  btn.textContent = '⏳ Enviando...'; btn.disabled = true;
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+      action: 'solicitarReativacao',
+      email: currentUser.email,
+      motivo
+    })});
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('reativacao-section').style.display = 'none';
+      document.getElementById('pending-screen').querySelector('div:first-child').innerHTML += '<p style="color:#1a7a4a;font-size:13px;margin-top:12px">✓ Solicitação enviada! Aguarde aprovação da diretoria.</p>';
+      toast('Solicitação enviada! ✓', 'ok');
+    } else toast('Erro ao enviar', 'err');
+  } catch(e) { toast('Erro de conexão', 'err'); }
+  finally { btn.textContent = '🔄 Solicitar reativação'; btn.disabled = false; }
+};
+
+// ── CANCELAMENTO ──────────────────────────────────────────
+window.solicitarCancelamento = async () => {
+  if (!confirm('Tem certeza que deseja solicitar o cancelamento da sua associação?')) return;
+  const motivo = document.getElementById('cancel-motivo').value.trim();
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+      action: 'solicitarCancelamento',
+      email: currentUser.email,
+      motivo
+    })});
+    const data = await res.json();
+    if (data.ok) toast('Solicitação enviada! A diretoria irá analisar.', 'ok');
+    else toast('Erro ao enviar', 'err');
+  } catch(e) { toast('Erro de conexão', 'err'); }
+};
+
+// ── COMPROVANTES ──────────────────────────────────────────
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-area').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+window.handleDrop = handleDrop;
+
+window.handleFile = (e) => processFile(e.target.files[0]);
+
+function processFile(file) {
+  if (file.size > 10 * 1024 * 1024) { toast('Arquivo muito grande. Máx 10MB.', 'err'); return; }
+  selectedFile = file;
+  const prev = document.getElementById('upload-preview');
+  const img = document.getElementById('preview-img');
+  const name = document.getElementById('preview-name');
+  prev.style.display = 'block';
+  name.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(0)}KB)`;
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+    reader.readAsDataURL(file);
+  } else { img.style.display = 'none'; }
+}
+
+window.enviarComprovante = async () => {
+  const tipo = document.getElementById('p-tipo').value;
+  const ref = document.getElementById('p-ref').value;
+  const valor = parseFloat(document.getElementById('p-valor').value);
+  const data = document.getElementById('p-data').value;
+  const obs = document.getElementById('p-obs').value.trim();
+  if (!tipo || !ref || !valor || !data) { toast('Preencha todos os campos', 'err'); return; }
+  if (!selectedFile) { toast('Anexe o comprovante', 'err'); return; }
+  const btn = document.querySelector('[onclick="enviarComprovante()"]');
+  btn.textContent = '⏳ Enviando...'; btn.disabled = true;
+  try {
+    const b64 = await fileToBase64(selectedFile);
+    const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+      action: 'enviarComprovante',
+      email: currentUser.email,
+      nome: userData.nome || currentUser.displayName || '',
+      tipo, ref, valor, data, obs,
+      arquivo_nome: selectedFile.name,
+      arquivo_tipo: selectedFile.type,
+      arquivo_base64: b64,
+      drive_folder_id: DRIVE_FOLDER_ID
+    })});
+    const result = await res.json();
+    if (result.ok) {
+      toast('Comprovante enviado! ✓', 'ok');
+      document.getElementById('p-tipo').value = '';
+      document.getElementById('p-valor').value = '';
+      document.getElementById('p-obs').value = '';
+      document.getElementById('upload-preview').style.display = 'none';
+      selectedFile = null;
+      loadMeusDados();
+    } else toast('Erro: ' + (result.error||'tente novamente'), 'err');
+  } catch(e) { toast('Erro de conexão', 'err'); }
+  finally { btn.textContent = '📤 Enviar comprovante'; btn.disabled = false; }
+};
+
+function fileToBase64(file) {
+  return new Promise((res,rej) => { const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(file); });
+}
+
+// ── DADOS ─────────────────────────────────────────────────
+window.loadMeusDados = async () => {
+  try {
+    const r = await fetch(`${SCRIPT_URL}?action=meusPagamentos&email=${encodeURIComponent(currentUser.email)}`);
+    const data = await r.json();
+    meusPagamentos = data.pagamentos || [];
+    updateStats();
+    renderHistorico();
+    renderUltimos();
+    verificarMensalidade();
+  } catch(e) {}
+};
+
+function updateStats() {
+  document.getElementById('st-total').textContent = meusPagamentos.length;
+  document.getElementById('st-aprovados').textContent = meusPagamentos.filter(p=>p.status==='aprovado').length;
+  document.getElementById('st-pendentes').textContent = meusPagamentos.filter(p=>p.status==='pendente').length;
+}
+
+function verificarMensalidade() {
+  const mods = userData.modalidades || [];
+  const mesesNecessarios = getMesesNecessarios(mods);
+  const pagamentos = meusPagamentos.filter(p=>p.tipo==='Mensalidade'&&p.status==='aprovado');
+  const mesesPagos = pagamentos.map(p=>p.ref);
+  const atrasados = mesesNecessarios.filter(m=>!mesesPagos.includes(m));
+  const quite = atrasados.length === 0 && mesesNecessarios.length > 0;
+  const el = document.getElementById('status-mensalidade-mes');
+  if (!el) return;
+  if (!mesesNecessarios.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text3);margin-top:8px">Nenhuma modalidade ativa ainda</div>';
+    return;
+  }
+  if (quite) {
+    el.innerHTML = '<div class="badge badge-quite" style="margin-top:8px">✓ Mensalidades em dia</div>';
+  } else {
+    el.innerHTML = `<div class="badge badge-inadim" style="margin-top:8px">⚠️ ${atrasados.length} mês(es) em atraso</div>
+    <div style="font-size:12px;color:var(--danger);margin-top:6px">Meses pendentes: ${atrasados.map(m=>{const[y,mo]=m.split('-');return new Date(y,mo-1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});}).join(', ')}</div>`;
+  }
+}
+
+function renderHistorico() {
+  const el = document.getElementById('historico-list');
+  if (!meusPagamentos.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Nenhum comprovante enviado</div>';
+    return;
+  }
+  el.innerHTML = meusPagamentos.sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(p => `
+    <div class="pagamento-item">
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px">${p.tipo} <span class="badge badge-${p.status}">${statusLabel(p.status)}</span></div>
+        <div style="font-size:12px;color:var(--text2)">${p.ref||''} • ${fmtDate(p.data)}</div>
+        ${p.obs_diretoria?`<div style="color:var(--danger);font-size:12px;margin-top:4px">⚠️ ${p.obs_diretoria}</div>`:''}
+        ${p.arquivo_url?`<a href="${p.arquivo_url}" target="_blank" style="font-size:12px;color:var(--primary2);text-decoration:none;display:inline-block;margin-top:4px">📎 Ver comprovante</a>`:''}
+      </div>
+      <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--primary);text-align:right">
+        R$ ${(p.valor||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}
+        <div style="font-size:11px;color:var(--text3);font-family:'Plus Jakarta Sans',sans-serif;font-weight:400">${p.status==='aprovado'?'✓ Confirmado':'Aguardando'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderUltimos() {
+  const el = document.getElementById('ultimos-comp');
+  const list = meusPagamentos.sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,3);
+  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Nenhum comprovante</div>'; return; }
+  el.innerHTML = list.map(p => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div><strong style="font-size:13px">${p.tipo}</strong> <span class="badge badge-${p.status}" style="font-size:10px">${statusLabel(p.status)}</span>
+      <div style="font-size:11px;color:var(--text3)">${p.ref||''} • ${fmtDate(p.data)}</div></div>
+      <div style="font-weight:600;font-size:13px">R$ ${(p.valor||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+    </div>`).join('');
+}
+
+// ── UTILS ─────────────────────────────────────────────────
+function statusLabel(s) { return {pendente:'⏳ Pendente',aprovado:'✓ Aprovado',rejeitado:'✕ Rejeitado'}[s]||s; }
+function fmtDate(d) { if(!d)return''; if(d.includes('/'))return d; const[y,m,day]=d.split('-'); return`${day}/${m}/${y}`; }
+window.toast = (msg, type='ok') => {
+  const el=document.getElementById('toast'); el.textContent=msg; el.className=`show ${type}`;
+  clearTimeout(window._tt); window._tt=setTimeout(()=>el.classList.remove('show'),3500);
+};
+</script>
+</body>
+</html>
